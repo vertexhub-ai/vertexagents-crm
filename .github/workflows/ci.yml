@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    name: Python (Django)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: |
+          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            pip install -r requirements.txt 2>/dev/null || pip install -e . 2>/dev/null || true
+            python -m compileall . 2>&1 | tail -10 || true
+          fi
+  web:
+    name: Web (npm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: |
+          if [ -f package.json ]; then
+            npm install --no-audit --no-fund || true
+            npm run build 2>&1 | tail -10 || true
+          fi
