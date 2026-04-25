@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}{{ lead }} — Lead{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-6">
+
+  {# Breadcrumb #}
+  <div class="text-sm text-gray-500 mb-4">
+    <a href="{% url 'leads:list' %}" class="hover:underline">Leads</a>
+    <span class="mx-1">/</span>
+    <span class="text-gray-800">{{ lead }}</span>
+  </div>
+
+  {# Converted banner #}
+  {% if lead.status == 'converted' %}
+  <div class="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-4 flex items-start gap-3">
+    <svg class="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+    </svg>
+    <div>
+      <p class="text-sm font-medium text-purple-800">This lead was converted.</p>
+      <p class="text-sm text-purple-600 mt-0.5">
+        Edit the resulting
+        {% if lead.converted_contact %}<a href="#" class="underline">Contact</a>{% endif %}{% if lead.converted_account %}, <a href="#" class="underline">Account</a>{% endif %}{% if lead.converted_opportunity %}, or <a href="#" class="underline">Opportunity</a>{% endif %}
+        instead.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-bold text-gray-900">{{ lead }}</h1>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+          {% if lead.status == 'new' %}bg-gray-100 text-gray-700
+          {% elif lead.status == 'contacted' %}bg-blue-100 text-blue-700
+          {% elif lead.status == 'qualified' %}bg-green-100 text-green-700
+          {% elif lead.status == 'disqualified' %}bg-red-100 text-red-700
+          {% elif lead.status == 'converted' %}bg-purple-100 text-purple-700
+          {% endif %}">
+          {{ lead.get_status_display }}
+        </span>
+      </div>
+      <div class="flex gap-2">
+        {% if lead.status != 'converted' %}
+          <a href="{% url 'leads:edit' lead.pk %}"
+             class="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
+            Edit
+          </a>
+          {% if lead.status != 'disqualified' %}
+          <a href="{% url 'leads:disqualify' lead.pk %}"
+             class="px-3 py-1.5 text-sm border rounded-md text-orange-600 hover:bg-orange-50">
+            Disqualify
+          </a>
+          {% endif %}
+          <form method="post" action="{% url 'leads:delete' lead.pk %}"
+                onsubmit="return confirm('Soft-delete this lead?')">
+            {% csrf_token %}
+            <button type="submit"
+                    class="px-3 py-1.5 text-sm border rounded-md text-red-600 hover:bg-red-50">
+              Delete
+            </button>
+          </form>
+        {% endif %}
+        {# Convert button will be added in C9 #}
+      </div>
+    </div>
+
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+      {% if lead.email %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <a href="mailto:{{ lead.email }}" class="text-blue-600 hover:underline">{{ lead.email }}</a>
+        </dd>
+      </div>
+      {% endif %}
+      {% if lead.phone %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</dt>
+        <dd class="mt-1 text-sm text-gray-900">{{ lead.phone }}</dd>
+      </div>
+      {% endif %}
+      {% if lead.company_name %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Company</dt>
+        <dd class="mt-1 text-sm text-gray-900">{{ lead.company_name }}</dd>
+      </div>
+      {% endif %}
+      {% if lead.title %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Title</dt>
+        <dd class="mt-1 text-sm text-gray-900">{{ lead.title }}</dd>
+      </div>
+      {% endif %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Source</dt>
+        <dd class="mt-1 text-sm text-gray-900">{{ lead.get_source_display|default:"—" }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          {{ lead.owner.get_full_name|default:lead.owner.username }}
+        </dd>
+      </div>
+      {% if lead.status == 'disqualified' and lead.disqualified_reason %}
+      <div class="sm:col-span-2">
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Disqualified reason</dt>
+        <dd class="mt-1 text-sm text-gray-900">{{ lead.disqualified_reason }}</dd>
+      </div>
+      {% endif %}
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Created</dt>
+        <dd class="mt-1 text-sm text-gray-500">{{ lead.created_at|date:"M d, Y g:i A" }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Last updated</dt>
+        <dd class="mt-1 text-sm text-gray-500">{{ lead.updated_at|date:"M d, Y g:i A" }}</dd>
+      </div>
+    </div>
+  </div>
+
+  {# Activity timeline — stub until C12 #}
+  <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h2 class="text-base font-semibold text-gray-800">Activity</h2>
+    </div>
+    <div class="px-6 py-8 text-center text-sm text-gray-400">
+      Activity timeline coming in C12.
+    </div>
+  </div>
+
+</div>
+{% endblock %}
