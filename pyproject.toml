@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "vertexagents-crm"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=5.1,<6",
+    "psycopg[binary]>=3.1",
+    "gunicorn>=21",
+    "whitenoise>=6",
+    "django-axes>=6.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-django>=4.8",
+    "factory-boy>=3.3",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+where = ["."]
