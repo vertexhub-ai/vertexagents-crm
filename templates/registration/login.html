@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-2xl font-bold text-gray-900">Sign in to your account</h2>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            <div class="mt-1">
+              {{ field }}
+            </div>
+            {% for error in field.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        {% if form.non_field_errors %}
+          <div class="rounded-md bg-red-50 p-4">
+            {% for error in form.non_field_errors %}
+              <p class="text-sm text-red-800">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+          Sign in
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
