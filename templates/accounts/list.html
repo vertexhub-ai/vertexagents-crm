@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+
+{% block content %}
+<div class="sm:flex sm:items-center sm:justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Accounts</h1>
+  <a href="{% url 'accounts:create' %}"
+     class="mt-3 sm:mt-0 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+    + New Account
+  </a>
+</div>
+
+<!-- Filters -->
+<form method="get" class="mb-6 flex flex-wrap gap-3 items-end">
+  <div>
+    <label class="block text-xs font-medium text-gray-700 mb-1">Search</label>
+    <input type="text" name="q" value="{{ q }}"
+           class="rounded-md border-gray-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500"
+           placeholder="Account name…">
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-700 mb-1">Owner</label>
+    <select name="owner" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500">
+      <option value="mine" {% if owner_filter == "mine" %}selected{% endif %}>Mine</option>
+      <option value="all" {% if owner_filter == "all" %}selected{% endif %}>All</option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-700 mb-1">Sort</label>
+    <select name="sort" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500">
+      <option value="name" {% if sort == "name" %}selected{% endif %}>Name A→Z</option>
+      <option value="-name" {% if sort == "-name" %}selected{% endif %}>Name Z→A</option>
+      <option value="-created" {% if sort == "-created" %}selected{% endif %}>Newest first</option>
+      <option value="created" {% if sort == "created" %}selected{% endif %}>Oldest first</option>
+      <option value="owner" {% if sort == "owner" %}selected{% endif %}>Owner A→Z</option>
+    </select>
+  </div>
+  <button type="submit"
+          class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+    Filter
+  </button>
+  {% if q or owner_filter != "mine" %}
+    <a href="{% url 'accounts:list' %}"
+       class="rounded-md px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+      Clear
+    </a>
+  {% endif %}
+</form>
+
+<!-- Table -->
+{% if page_obj.object_list %}
+  <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+    <table class="min-w-full divide-y divide-gray-300">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="py-3 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Name</th>
+          <th scope="col" class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Industry</th>
+          <th scope="col" class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Size</th>
+          <th scope="col" class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Owner</th>
+          <th scope="col" class="relative py-3 pl-3 pr-4"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 bg-white">
+        {% for account in page_obj %}
+          <tr class="hover:bg-gray-50">
+            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
+              <a href="{% url 'accounts:detail' account.pk %}" class="text-indigo-600 hover:text-indigo-800">{{ account.name }}</a>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ account.industry|default:"—" }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ account.get_size_display }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ account.owner.username }}</td>
+            <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium space-x-3">
+              <a href="{% url 'accounts:detail' account.pk %}" class="text-indigo-600 hover:text-indigo-800">View</a>
+              {% if request.user.is_staff or account.owner == request.user %}
+                <a href="{% url 'accounts:edit' account.pk %}" class="text-yellow-600 hover:text-yellow-800">Edit</a>
+                <a href="{% url 'accounts:delete' account.pk %}"
+                   hx-get="{% url 'accounts:delete' account.pk %}"
+                   hx-target="#modal-container"
+                   hx-swap="innerHTML"
+                   class="text-red-600 hover:text-red-800 cursor-pointer">Delete</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+    <nav class="mt-4 flex items-center justify-between" aria-label="Pagination">
+      <p class="text-sm text-gray-700">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+      </p>
+      <div class="flex gap-2">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&owner={{ owner_filter }}&sort={{ sort }}"
+             class="rounded-md bg-white px-3 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+            Previous
+          </a>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&owner={{ owner_filter }}&sort={{ sort }}"
+             class="rounded-md bg-white px-3 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+            Next
+          </a>
+        {% endif %}
+      </div>
+    </nav>
+  {% endif %}
+
+{% else %}
+  <div class="text-center py-12 text-gray-500">
+    <p class="text-lg">No accounts found.</p>
+    {% if q %}
+      <p class="text-sm mt-1">Try a different search term.</p>
+    {% else %}
+      <a href="{% url 'accounts:create' %}" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 text-sm">Create your first account →</a>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- HTMX delete modal container -->
+<div id="modal-container"></div>
+
+{% endblock %}
