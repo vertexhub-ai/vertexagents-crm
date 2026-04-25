@@ -1,0 +1,130 @@
+{% extends 'crm_app/base.html' %}
+{% block title %}Convert Lead — {{ lead }}{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:1.5rem;">
+  <h1 style="margin:0 0 .5rem;">Convert Lead: {{ lead.first_name }} {{ lead.last_name }}</h1>
+  <p class="helper-text" style="margin:0;">
+    <a href="{% url 'lead_detail' lead.pk %}">&larr; Back to Lead</a>
+  </p>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <!-- Section 1: Contact -->
+  <div class="section">
+    <h2>1. Contact Details</h2>
+    {% for field in contact_form %}
+    <div class="form-group">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    {% endfor %}
+    {% if contact_form.non_field_errors %}
+      <ul class="errorlist">{% for e in contact_form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  <!-- Section 2: Account -->
+  <div class="section">
+    <h2>2. Account</h2>
+    <div class="form-group">
+      <fieldset>
+        <legend>Account option</legend>
+        {% for radio in account_form.account_mode %}
+          <label class="radio-option">{{ radio.tag }} {{ radio.choice_label }}</label>
+        {% endfor %}
+      </fieldset>
+    </div>
+
+    <div id="new-account-section" class="form-group">
+      {{ account_form.new_account_name.label_tag }}
+      {{ account_form.new_account_name }}
+      {% if account_form.new_account_name.errors %}
+        <ul class="errorlist">{% for e in account_form.new_account_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div id="existing-account-section" class="form-group">
+      {{ account_form.existing_account.label_tag }}
+      {{ account_form.existing_account }}
+      {% if account_form.existing_account.errors %}
+        <ul class="errorlist">{% for e in account_form.existing_account.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    {% if account_form.non_field_errors %}
+      <ul class="errorlist">{% for e in account_form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  <!-- Section 3: Opportunity -->
+  <div class="section">
+    <h2>3. Opportunity</h2>
+    <div class="form-group">
+      <label class="radio-option" style="font-weight:normal;">
+        {{ opp_form.create_opportunity }}
+        Create an opportunity now
+      </label>
+    </div>
+
+    <div id="opportunity-fields">
+      <div class="form-group">
+        {{ opp_form.opportunity_name.label_tag }}
+        {{ opp_form.opportunity_name }}
+        {% if opp_form.opportunity_name.errors %}
+          <ul class="errorlist">{% for e in opp_form.opportunity_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ opp_form.amount.label_tag }}
+        {{ opp_form.amount }}
+      </div>
+      <div class="form-group">
+        {{ opp_form.expected_close_date.label_tag }}
+        {{ opp_form.expected_close_date }}
+      </div>
+    </div>
+
+    {% if opp_form.non_field_errors %}
+      <ul class="errorlist">{% for e in opp_form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  <div style="display:flex;gap:.75rem;">
+    <button type="submit" class="btn btn-primary">Convert Lead</button>
+    <a href="{% url 'lead_detail' lead.pk %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<script>
+(function () {
+  var accountRadios = document.querySelectorAll('input[name="{{ account_form.account_mode.html_name }}"]');
+  var existingSection = document.getElementById('existing-account-section');
+  var newSection = document.getElementById('new-account-section');
+  var createOppCheck = document.getElementById('{{ opp_form.create_opportunity.auto_id }}');
+  var oppFields = document.getElementById('opportunity-fields');
+
+  function updateAccountSections() {
+    var checked = document.querySelector('input[name="{{ account_form.account_mode.html_name }}"]:checked');
+    if (!checked) return;
+    newSection.style.display = checked.value === 'new' ? '' : 'none';
+    existingSection.style.display = checked.value === 'existing' ? '' : 'none';
+  }
+
+  function updateOppFields() {
+    if (createOppCheck) {
+      oppFields.style.display = createOppCheck.checked ? '' : 'none';
+    }
+  }
+
+  accountRadios.forEach(function (r) { r.addEventListener('change', updateAccountSections); });
+  if (createOppCheck) { createOppCheck.addEventListener('change', updateOppFields); }
+
+  updateAccountSections();
+  updateOppFields();
+}());
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'crm_app/base.html' %}
+{% block title %}Leads — CRM{% endblock %}
+{% block content %}
+<h1>Leads</h1>
+
+<form method="get" style="margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-end;">
+  <div>
+    <label for="status-filter">Status</label>
+    <select name="status" id="status-filter">
+      <option value="">All</option>
+      <option value="new" {% if request.GET.status == 'new' %}selected{% endif %}>New</option>
+      <option value="contacted" {% if request.GET.status == 'contacted' %}selected{% endif %}>Contacted</option>
+      <option value="qualified" {% if request.GET.status == 'qualified' %}selected{% endif %}>Qualified</option>
+      <option value="disqualified" {% if request.GET.status == 'disqualified' %}selected{% endif %}>Disqualified</option>
+      <option value="converted" {% if request.GET.status == 'converted' %}selected{% endif %}>Converted</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Company</th>
+      <th>Status</th>
+      <th>Owner</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lead in leads %}
+    <tr>
+      <td><a href="{% url 'lead_detail' lead.pk %}">{{ lead.first_name }} {{ lead.last_name }}</a></td>
+      <td>{{ lead.email|default:'—' }}</td>
+      <td>{{ lead.company_name|default:'—' }}</td>
+      <td><span class="badge badge-{{ lead.status }}">{{ lead.get_status_display }}</span></td>
+      <td>{{ lead.owner|default:'—' }}</td>
+      <td>{{ lead.created_at|date:"M j, Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">No leads found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

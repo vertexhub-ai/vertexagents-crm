@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CRM{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    a { color: #0070f3; }
+    nav { margin-bottom: 2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: .75rem; }
+    nav a { margin-right: 1rem; text-decoration: none; font-weight: 600; }
+    .btn { padding: .45rem 1rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; font-size: .95rem; }
+    .btn-primary { background: #0070f3; color: #fff; }
+    .btn-primary:hover { background: #005ad4; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .alert { padding: .75rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+    .alert-success { background: #d1fae5; color: #065f46; }
+    .alert-error, .alert-danger { background: #fee2e2; color: #991b1b; }
+    .alert-warning { background: #fef3c7; color: #92400e; }
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; font-weight: 600; margin-bottom: .3rem; font-size: .9rem; }
+    input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select { width: 100%; padding: .45rem .7rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 1rem; }
+    input[type=checkbox] { width: auto; margin-right: .4rem; }
+    .errorlist { color: #991b1b; font-size: .85rem; padding: 0; margin: .3rem 0 0; list-style: none; }
+    .section { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; background: #fafafa; }
+    .section h2 { margin-top: 0; font-size: 1.1rem; color: #334155; }
+    .badge { padding: .2rem .6rem; border-radius: 12px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+    .badge-qualified { background: #d1fae5; color: #065f46; }
+    .badge-converted { background: #dbeafe; color: #1e40af; }
+    .badge-new { background: #f1f5f9; color: #475569; }
+    .badge-contacted { background: #fef3c7; color: #92400e; }
+    .badge-disqualified { background: #fee2e2; color: #991b1b; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid #e2e8f0; font-size: .93rem; }
+    th { font-weight: 700; background: #f8fafc; color: #475569; }
+    .readonly-banner { background: #dbeafe; color: #1e40af; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.25rem; font-weight: 600; border: 1px solid #93c5fd; }
+    .helper-text { color: #64748b; font-size: .88rem; margin-top: .25rem; }
+    dl { display: grid; grid-template-columns: 160px 1fr; gap: .4rem 1rem; }
+    dt { font-weight: 600; color: #475569; font-size: .88rem; }
+    dd { margin: 0; }
+    fieldset { border: none; padding: 0; margin: 0; }
+    legend { font-weight: 600; margin-bottom: .5rem; font-size: .9rem; }
+    .radio-option { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; font-weight: normal; font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'lead_list' %}">Leads</a>
+    <a href="/admin/">Admin</a>
+  </nav>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</body>
+</html>

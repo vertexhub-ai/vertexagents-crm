@@ -1,0 +1,61 @@
+{% extends 'crm_app/base.html' %}
+{% block title %}{{ lead }} — Lead{% endblock %}
+{% block content %}
+
+{% if lead.status == 'converted' %}
+<div class="readonly-banner">
+  This lead was converted on {{ lead.converted_at|date:"N j, Y \a\t g:i A" }}.
+  {% if lead.converted_contact %}Contact: {{ lead.converted_contact }}.{% endif %}
+  {% if lead.converted_opportunity %}Opportunity: {{ lead.converted_opportunity }}.{% endif %}
+  This record is now read-only.
+</div>
+{% endif %}
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+  <div>
+    <h1 style="margin:0 0 .4rem;">{{ lead.first_name }} {{ lead.last_name }}</h1>
+    <span class="badge badge-{{ lead.status }}">{{ lead.get_status_display }}</span>
+  </div>
+
+  <div>
+    {% if lead.status == 'qualified' %}
+      <a href="{% url 'lead_convert' lead.pk %}" class="btn btn-primary">Convert Lead</a>
+    {% else %}
+      <p class="helper-text" style="margin:0;">
+        {% if lead.status == 'new' %}Qualify this lead before converting.
+        {% elif lead.status == 'contacted' %}Lead must be qualified before converting.
+        {% elif lead.status == 'disqualified' %}Disqualified leads cannot be converted.
+        {% elif lead.status == 'converted' %}This lead has already been converted.
+        {% endif %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Details</h2>
+  <dl>
+    <dt>Email</dt><dd>{{ lead.email|default:'—' }}</dd>
+    <dt>Phone</dt><dd>{{ lead.phone|default:'—' }}</dd>
+    <dt>Title</dt><dd>{{ lead.title|default:'—' }}</dd>
+    <dt>Company</dt><dd>{{ lead.company_name|default:'—' }}</dd>
+    <dt>Owner</dt><dd>{{ lead.owner|default:'—' }}</dd>
+    <dt>Created</dt><dd>{{ lead.created_at|date:"N j, Y" }}</dd>
+    <dt>Updated</dt><dd>{{ lead.updated_at|date:"N j, Y" }}</dd>
+  </dl>
+</div>
+
+{% if lead.status == 'converted' %}
+<div class="section">
+  <h2>Conversion Records</h2>
+  <dl>
+    <dt>Contact</dt><dd>{{ lead.converted_contact|default:'—' }}</dd>
+    <dt>Account</dt><dd>{{ lead.converted_account|default:'—' }}</dd>
+    <dt>Opportunity</dt><dd>{{ lead.converted_opportunity|default:'—' }}</dd>
+    <dt>Converted at</dt><dd>{{ lead.converted_at|date:"N j, Y g:i A" }}</dd>
+  </dl>
+</div>
+{% endif %}
+
+<p><a href="{% url 'lead_list' %}">&larr; Back to Leads</a></p>
+{% endblock %}
