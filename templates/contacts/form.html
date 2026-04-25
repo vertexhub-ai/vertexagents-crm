@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Contact — CRM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ action }} Contact</h1>
+  <a href="{% url 'contacts:list' %}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="form-card" style="max-width:600px">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="{{ form.first_name.id_for_label }}">First name *</label>
+      {{ form.first_name }}
+      {% if form.first_name.errors %}<ul class="errorlist">{% for e in form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.last_name.id_for_label }}">Last name</label>
+      {{ form.last_name }}
+      {% if form.last_name.errors %}<ul class="errorlist">{% for e in form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.phone.id_for_label }}">Phone</label>
+      {{ form.phone }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.title.id_for_label }}">Job title</label>
+      {{ form.title }}
+    </div>
+
+    <!-- Account autocomplete -->
+    <div class="form-group">
+      <label>Account</label>
+      {{ form.account }}  {# hidden UUID input #}
+      <div class="autocomplete-wrapper">
+        <input type="text"
+               id="account-search"
+               placeholder="Search accounts…"
+               autocomplete="off"
+               class="form-input"
+               value="{% if form.instance.account %}{{ form.instance.account.name }}{% elif form.initial.account %}{{ form.initial.account.name }}{% endif %}"
+               hx-get="/accounts/?format=options"
+               hx-trigger="input changed delay:200ms"
+               hx-target="#account-results"
+               hx-include="[name='q']"
+               name="q"
+               oninput="if(!this.value){document.getElementById('id_account').value='';document.getElementById('account-selected').textContent='';}">
+        <div id="account-results" class="autocomplete-results" style="display:none"></div>
+      </div>
+      {% if form.account.errors %}<ul class="errorlist">{% for e in form.account.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      <div id="account-selected" style="font-size:12px;color:#2563eb;margin-top:.25rem">
+        {% if form.instance.account %}{{ form.instance.account.name }}{% elif form.initial.account %}{{ form.initial.account.name }}{% endif %}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.5rem;margin-top:1.25rem">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'contacts:list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+function selectAccount(el) {
+  document.getElementById('id_account').value = el.dataset.id;
+  document.getElementById('account-search').value = el.dataset.name;
+  document.getElementById('account-selected').textContent = el.dataset.name;
+  document.getElementById('account-results').style.display = 'none';
+}
+
+document.getElementById('account-search').addEventListener('htmx:afterSwap', function() {
+  const r = document.getElementById('account-results');
+  r.style.display = r.innerHTML.trim() ? 'block' : 'none';
+});
+
+document.addEventListener('htmx:afterSwap', function(e) {
+  if (e.detail.target.id === 'account-results') {
+    const r = document.getElementById('account-results');
+    r.style.display = r.innerHTML.trim() ? 'block' : 'none';
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.autocomplete-wrapper')) {
+    document.getElementById('account-results').style.display = 'none';
+  }
+});
+</script>
+{% endblock %}

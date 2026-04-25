@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ account.name }} — CRM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ account.name }}</h1>
+  <div style="display:flex;gap:.5rem">
+    <a href="{% url 'accounts:edit' account.pk %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'accounts:list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+</div>
+<div class="form-card" style="max-width:640px">
+  <div class="detail-grid">
+    <span class="detail-label">Name</span><span class="detail-value">{{ account.name }}</span>
+    <span class="detail-label">Website</span><span class="detail-value">{% if account.website %}<a href="{{ account.website }}" target="_blank">{{ account.website }}</a>{% else %}—{% endif %}</span>
+    <span class="detail-label">Phone</span><span class="detail-value">{{ account.phone|default:"—" }}</span>
+    <span class="detail-label">Owner</span><span class="detail-value">{{ account.owner.get_full_name|default:account.owner.username }}</span>
+    <span class="detail-label">Created</span><span class="detail-value">{{ account.created_at|date:"N j, Y" }}</span>
+  </div>
+</div>
+<h2 style="margin-top:1.5rem">Contacts</h2>
+<table>
+  <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Title</th><th></th></tr></thead>
+  <tbody>
+    {% for contact in account.contacts.all %}
+    <tr>
+      <td><a href="{% url 'contacts:detail' contact.pk %}">{{ contact.full_name }}</a></td>
+      <td>{{ contact.email|default:"—" }}</td>
+      <td>{{ contact.phone|default:"—" }}</td>
+      <td>{{ contact.title|default:"—" }}</td>
+      <td><a href="{% url 'contacts:edit' contact.pk %}" class="btn btn-secondary btn-sm">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="color:#9ca3af;text-align:center;padding:1.5rem">No contacts linked.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Contacts — CRM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Contacts</h1>
+  <a href="{% url 'contacts:create' %}" class="btn btn-primary">+ New Contact</a>
+</div>
+
+<form class="filters" method="get">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search name, email, account…">
+  <select name="owner">
+    <option value="mine" {% if owner_filter == "mine" %}selected{% endif %}>My contacts</option>
+    <option value="all" {% if owner_filter == "all" %}selected{% endif %}>All contacts</option>
+  </select>
+  <select name="account">
+    <option value="">All accounts</option>
+    {% for acct in accounts %}
+    <option value="{{ acct.pk }}" {% if account_filter == acct.pk|stringformat:"s" %}selected{% endif %}>{{ acct.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+  {% if q or owner_filter != "mine" or account_filter %}
+  <a href="{% url 'contacts:list' %}" class="btn btn-secondary">Clear</a>
+  {% endif %}
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Account</th>
+      <th>Owner</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contact in page_obj %}
+    <tr id="contact-row-{{ contact.pk }}">
+      <td><a href="{% url 'contacts:detail' contact.pk %}">{{ contact.full_name }}</a></td>
+      <td>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</td>
+      <td>{{ contact.phone|default:"—" }}</td>
+      <td>{% if contact.account %}<a href="{% url 'accounts:detail' contact.account.pk %}">{{ contact.account.name }}</a>{% else %}—{% endif %}</td>
+      <td>{{ contact.owner.get_full_name|default:contact.owner.username }}</td>
+      <td style="white-space:nowrap">
+        <a href="{% url 'contacts:edit' contact.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <button class="btn btn-danger btn-sm"
+                hx-get="{% url 'contacts:delete' contact.pk %}"
+                hx-target="#modal-container"
+                hx-swap="innerHTML">Delete</button>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="color:#9ca3af;text-align:center;padding:2rem">No contacts found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a href="?q={{ q }}&owner={{ owner_filter }}&account={{ account_filter }}&page={{ page_obj.previous_page_number }}">&laquo;</a>
+  {% endif %}
+  <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?q={{ q }}&owner={{ owner_filter }}&account={{ account_filter }}&page={{ page_obj.next_page_number }}">&raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login — CRM</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); width: 360px; }
+    h1 { font-size: 1.3rem; margin-bottom: 1.25rem; color: #1e3a5f; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: .3rem; color: #374151; }
+    input { width: 100%; padding: .45rem .65rem; border: 1px solid #d1d5db; border-radius: 5px; font-size: 13px; margin-bottom: 1rem; }
+    button { width: 100%; padding: .55rem; background: #2563eb; color: #fff; border: none; border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .errors { color: #dc2626; font-size: 12px; margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Sign in</h1>
+  {% if form.errors %}
+  <div class="errors">Invalid username or password.</div>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <label for="id_username">Username</label>
+    <input id="id_username" name="username" type="text" autofocus required>
+    <label for="id_password">Password</label>
+    <input id="id_password" name="password" type="password" required>
+    <button type="submit">Sign in</button>
+  </form>
+</div>
+</body>
+</html>

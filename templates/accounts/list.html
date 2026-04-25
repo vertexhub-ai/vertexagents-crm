@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Accounts — CRM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Accounts</h1>
+  <a href="{% url 'accounts:create' %}" class="btn btn-primary">+ New Account</a>
+</div>
+<form class="filters" method="get">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search accounts…">
+  <button type="submit" class="btn btn-secondary">Search</button>
+</form>
+<table>
+  <thead>
+    <tr><th>Name</th><th>Owner</th><th>Phone</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for account in page_obj %}
+    <tr>
+      <td><a href="{% url 'accounts:detail' account.pk %}">{{ account.name }}</a></td>
+      <td>{{ account.owner.get_full_name|default:account.owner.username }}</td>
+      <td>{{ account.phone }}</td>
+      <td>
+        <a href="{% url 'accounts:edit' account.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <button class="btn btn-danger btn-sm"
+                hx-get="{% url 'accounts:delete' account.pk %}"
+                hx-target="#modal-container"
+                hx-swap="innerHTML">Delete</button>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" style="color:#9ca3af;text-align:center;padding:2rem">No accounts found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a>
+  {% endif %}
+  <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ contact.full_name }} — CRM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ contact.full_name }}</h1>
+  <div style="display:flex;gap:.5rem">
+    <a href="{% url 'contacts:edit' contact.pk %}" class="btn btn-secondary">Edit</a>
+    <button class="btn btn-danger"
+            hx-get="{% url 'contacts:delete' contact.pk %}"
+            hx-target="#modal-container"
+            hx-swap="innerHTML">Delete</button>
+    <a href="{% url 'contacts:list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+</div>
+
+<div class="form-card" style="max-width:640px">
+  <div class="detail-grid">
+    <span class="detail-label">First name</span><span class="detail-value">{{ contact.first_name }}</span>
+    <span class="detail-label">Last name</span><span class="detail-value">{{ contact.last_name|default:"—" }}</span>
+    <span class="detail-label">Email</span>
+    <span class="detail-value">{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</span>
+    <span class="detail-label">Phone</span><span class="detail-value">{{ contact.phone|default:"—" }}</span>
+    <span class="detail-label">Title</span><span class="detail-value">{{ contact.title|default:"—" }}</span>
+    <span class="detail-label">Account</span>
+    <span class="detail-value">
+      {% if contact.account %}
+        <a href="{% url 'accounts:detail' contact.account.pk %}">{{ contact.account.name }}</a>
+      {% else %}—{% endif %}
+    </span>
+    <span class="detail-label">Owner</span>
+    <span class="detail-value">{{ contact.owner.get_full_name|default:contact.owner.username }}</span>
+    <span class="detail-label">Created</span><span class="detail-value">{{ contact.created_at|date:"N j, Y" }}</span>
+    <span class="detail-label">Updated</span><span class="detail-value">{{ contact.updated_at|date:"N j, Y" }}</span>
+  </div>
+</div>
+
+<h2 style="margin-top:1.75rem">Activity</h2>
+<div class="form-card" style="max-width:640px;color:#9ca3af;font-size:13px;padding:1rem 1.5rem">
+  Activity timeline will appear here once C12 lands.
+</div>
+{% endblock %}

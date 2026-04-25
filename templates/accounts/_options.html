@@ -1,0 +1,10 @@
+{% for account in accounts %}
+<div class="autocomplete-option"
+     data-id="{{ account.pk }}"
+     data-name="{{ account.name }}"
+     onclick="selectAccount(this)">
+  {{ account.name }}
+</div>
+{% empty %}
+<div class="autocomplete-option" style="color:#9ca3af;cursor:default">No accounts found</div>
+{% endfor %}

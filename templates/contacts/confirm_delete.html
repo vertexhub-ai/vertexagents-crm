@@ -1,0 +1,23 @@
+<div class="modal-backdrop" id="delete-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h2>Delete Contact</h2>
+    <p style="margin:.75rem 0 1.25rem;font-size:13px;color:#374151">
+      Are you sure you want to delete <strong>{{ contact.full_name }}</strong>?
+      This action can be undone by an administrator.
+    </p>
+    <form method="post" action="{% url 'contacts:delete' contact.pk %}"
+          hx-post="{% url 'contacts:delete' contact.pk %}"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-target="body">
+      {% csrf_token %}
+      <div style="display:flex;gap:.5rem">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function closeModal(){document.getElementById('modal-container').innerHTML='';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+</script>
