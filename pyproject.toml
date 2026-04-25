@@ -1,0 +1,24 @@
+[project]
+name = "vertexagents-crm"
+version = "0.1.0"
+description = "Small internal CRM (Django 5.x + HTMX + Postgres)"
+requires-python = ">=3.12"
+dependencies = [
+  "Django>=5.0,<5.2",
+  "psycopg[binary]>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-django>=4.8",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
