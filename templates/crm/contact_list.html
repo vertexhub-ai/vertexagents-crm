@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Contacts{% endblock %}
+{% block content %}
+<h2 class="mb-3">Contacts</h2>
+<table class="table table-hover">
+  <thead><tr><th>Name</th><th>Account</th><th>Email</th><th>Created</th></tr></thead>
+  <tbody>
+    {% for contact in contacts %}
+    <tr>
+      <td><a href="{% url 'contact_detail' contact.pk %}">{{ contact }}</a></td>
+      <td>{{ contact.account|default:"—" }}</td>
+      <td>{{ contact.email|default:"—" }}</td>
+      <td>{{ contact.created_at|date:"M j, Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="text-muted">No contacts yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

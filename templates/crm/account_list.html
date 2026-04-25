@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+<h2 class="mb-3">Accounts</h2>
+<table class="table table-hover">
+  <thead><tr><th>Name</th><th>Domain</th><th>Created</th></tr></thead>
+  <tbody>
+    {% for account in accounts %}
+    <tr>
+      <td><a href="{% url 'account_detail' account.pk %}">{{ account }}</a></td>
+      <td>{{ account.domain|default:"—" }}</td>
+      <td>{{ account.created_at|date:"M j, Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" class="text-muted">No accounts yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

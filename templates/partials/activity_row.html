@@ -1,0 +1,119 @@
+{% load i18n %}
+{# Single activity row. Context: activity, is_pending #}
+<div class="d-flex gap-3 mb-3 p-2 border rounded{% if is_pending %} border-warning bg-warning bg-opacity-10{% endif %}">
+  <div class="fs-4" title="{{ activity.get_kind_display }}">{{ activity.icon }}</div>
+  <div class="flex-grow-1">
+    <div class="d-flex justify-content-between align-items-start">
+      <strong>{{ activity.subject }}</strong>
+      <div class="d-flex gap-2 align-items-center">
+        <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+
+        {# Mark done button — pending tasks only #}
+        {% if is_pending %}
+        <form hx-post="{% url 'activity_complete' activity.pk %}"
+              hx-target="#activity-timeline"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-success py-0">Mark done</button>
+        </form>
+        {% endif %}
+
+        {# Edit / Delete — own activities or admin #}
+        {% if activity.author == request.user or request.user.is_staff %}
+        <button class="btn btn-sm btn-outline-secondary py-0"
+                type="button"
+                onclick="toggleEdit('edit-{{ activity.pk }}')">Edit</button>
+
+        <form hx-post="{% url 'activity_delete' activity.pk %}"
+              hx-target="#activity-timeline"
+              hx-swap="outerHTML"
+              hx-confirm="Delete this activity?">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger py-0">Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <small class="text-muted">{{ activity.author.get_full_name|default:activity.author.username }}</small>
+
+    {% if activity.due_at %}
+    <div class="small mt-1">
+      <span class="text-secondary">Due: {{ activity.due_at|date:"M j, Y H:i" }}</span>
+      {% if activity.completed_at %}
+      <span class="text-success ms-2">✓ Done {{ activity.completed_at|date:"M j, Y H:i" }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if activity.body %}
+    <div class="mt-1">
+      <span class="activity-body-short" id="body-short-{{ activity.pk }}">
+        {{ activity.body|truncatechars:120 }}
+        {% if activity.body|length > 120 %}
+        <a href="#" class="small" onclick="showMore('{{ activity.pk }}'); return false;">show more</a>
+        {% endif %}
+      </span>
+      <span class="activity-body-full d-none" id="body-full-{{ activity.pk }}">
+        {{ activity.body }}
+        <a href="#" class="small" onclick="showLess('{{ activity.pk }}'); return false;">show less</a>
+      </span>
+    </div>
+    {% endif %}
+
+    {# Inline edit form (hidden by default) #}
+    {% if activity.author == request.user or request.user.is_staff %}
+    <div id="edit-{{ activity.pk }}" class="d-none mt-2">
+      <form hx-post="{% url 'activity_edit' activity.pk %}"
+            hx-target="#activity-timeline"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="row g-1 align-items-end">
+          <div class="col">
+            <input type="text" name="subject" value="{{ activity.subject }}"
+                   class="form-control form-control-sm" required>
+          </div>
+          <div class="col-auto">
+            <select name="kind" class="form-select form-select-sm">
+              {% for val, label in kind_choices %}
+              <option value="{{ val }}"{% if activity.kind == val %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+            <button type="button" class="btn btn-sm btn-secondary"
+                    onclick="toggleEdit('edit-{{ activity.pk }}')">Cancel</button>
+          </div>
+        </div>
+        <div class="mt-1">
+          <textarea name="body" class="form-control form-control-sm" rows="2">{{ activity.body }}</textarea>
+        </div>
+        {% if activity.due_at %}
+        <div class="mt-1">
+          <input type="datetime-local" name="due_at"
+                 value="{{ activity.due_at|date:'Y-m-d' }}T{{ activity.due_at|time:'H:i' }}"
+                 class="form-control form-control-sm">
+        </div>
+        {% endif %}
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function toggleEdit(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('d-none');
+}
+function showMore(pk) {
+  document.getElementById('body-short-' + pk).classList.add('d-none');
+  document.getElementById('body-full-' + pk).classList.remove('d-none');
+}
+function showLess(pk) {
+  document.getElementById('body-full-' + pk).classList.remove('d-none');
+  document.getElementById('body-short-' + pk).classList.remove('d-none');
+  document.getElementById('body-full-' + pk).classList.add('d-none');
+}
+</script>

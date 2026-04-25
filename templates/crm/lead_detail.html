@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Lead: {{ obj }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>{{ obj }}</h2>
+  <a href="{% url 'lead_list' %}" class="btn btn-sm btn-outline-secondary">← Leads</a>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-5">Email</dt>
+          <dd class="col-7">{{ obj.email|default:"—" }}</dd>
+          <dt class="col-5">Phone</dt>
+          <dd class="col-7">{{ obj.phone|default:"—" }}</dd>
+          <dt class="col-5">Status</dt>
+          <dd class="col-7">{{ obj.get_status_display }}</dd>
+          <dt class="col-5">Created</dt>
+          <dd class="col-7">{{ obj.created_at|date:"M j, Y" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% include "partials/timeline.html" %}
+{% endblock %}

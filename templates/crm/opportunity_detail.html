@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Opportunity: {{ obj }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>{{ obj }}</h2>
+  <a href="{% url 'opportunity_list' %}" class="btn btn-sm btn-outline-secondary">← Opportunities</a>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-5">Account</dt>
+          <dd class="col-7">{{ obj.account|default:"—" }}</dd>
+          <dt class="col-5">Stage</dt>
+          <dd class="col-7">{{ obj.get_stage_display }}</dd>
+          <dt class="col-5">Amount</dt>
+          <dd class="col-7">{% if obj.amount %}${{ obj.amount }}{% else %}—{% endif %}</dd>
+          <dt class="col-5">Close date</dt>
+          <dd class="col-7">{{ obj.close_date|date:"M j, Y"|default:"—" }}</dd>
+          <dt class="col-5">Created</dt>
+          <dd class="col-7">{{ obj.created_at|date:"M j, Y" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% include "partials/timeline.html" %}
+{% endblock %}

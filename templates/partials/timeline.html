@@ -1,0 +1,77 @@
+{% load i18n %}
+{# Reusable timeline component.
+   Required context: parent_obj, parent_type, create_activity_url,
+                     pending_tasks (qs), timeline_activities (qs), form #}
+<div id="activity-timeline" class="mt-5">
+  <h5 class="mb-3">Activity Timeline</h5>
+
+  {# ── Add activity form ─────────────────────────────────────────────────── #}
+  <div class="card mb-4">
+    <div class="card-body">
+      <form hx-post="{{ create_activity_url }}"
+            hx-target="#activity-timeline"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="row g-2 align-items-end">
+          <div class="col-auto">
+            {{ form.kind }}
+          </div>
+          <div class="col">
+            {{ form.subject }}
+            {% if form.subject.errors %}
+              <div class="text-danger small">{{ form.subject.errors.0 }}</div>
+            {% endif %}
+          </div>
+          <div class="col-auto" id="due-at-wrapper"
+               style="display:{% if form.instance.kind in 'task meeting' %}block{% else %}none{% endif %}">
+            {{ form.due_at }}
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </div>
+        <div class="mt-2">
+          {{ form.body }}
+          {% if form.body.errors %}
+            <div class="text-danger small">{{ form.body.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ── Pending tasks pinned to top ───────────────────────────────────────── #}
+  {% if pending_tasks %}
+  <div class="mb-3">
+    <h6 class="text-warning">📌 Pending Tasks &amp; Meetings</h6>
+    {% for activity in pending_tasks %}
+      {% include "partials/activity_row.html" with activity=activity is_pending=True %}
+    {% endfor %}
+  </div>
+  <hr>
+  {% endif %}
+
+  {# ── Chronological timeline ────────────────────────────────────────────── #}
+  {% if timeline_activities %}
+    {% for activity in timeline_activities %}
+      {% include "partials/activity_row.html" with activity=activity is_pending=False %}
+    {% endfor %}
+  {% else %}
+    {% if not pending_tasks %}
+    <p class="text-muted">No activities yet.</p>
+    {% endif %}
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  var kindSel = document.querySelector('[name="kind"]');
+  var dueWrap = document.getElementById('due-at-wrapper');
+  if (!kindSel || !dueWrap) return;
+  function toggle() {
+    dueWrap.style.display = (kindSel.value === 'task' || kindSel.value === 'meeting') ? 'block' : 'none';
+  }
+  kindSel.addEventListener('change', toggle);
+  toggle();
+})();
+</script>
