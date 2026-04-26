@@ -71,7 +71,7 @@ def account_create(request):
             if not account.owner_id:
                 account.owner = request.user
             account.save()
-            messages.success(request, f"Account "{account.name}" created.")
+            messages.success(request, f'Account "{account.name}" created.')
             return redirect("accounts:detail", pk=account.pk)
     else:
         form = AccountForm(initial={"owner": request.user})
@@ -89,7 +89,7 @@ def account_edit(request, pk):
         form = AccountForm(request.POST, instance=account)
         if form.is_valid():
             form.save()
-            messages.success(request, f"Account "{account.name}" updated.")
+            messages.success(request, f'Account "{account.name}" updated.')
             return redirect("accounts:detail", pk=account.pk)
     else:
         form = AccountForm(instance=account)
@@ -105,7 +105,7 @@ def account_delete(request, pk):
 
     if request.method == "POST":
         account.soft_delete(request.user)
-        messages.success(request, f"Account "{account.name}" deleted.")
+        messages.success(request, f'Account "{account.name}" deleted.')
         return redirect("accounts:list")
 
     # GET: return confirm fragment (for HTMX modal or plain page)

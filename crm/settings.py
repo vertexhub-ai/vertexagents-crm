@@ -105,3 +105,16 @@ AUTHENTICATION_BACKENDS = [
 ]
 AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = 1  # hour
+
+# ---------------------------------------------------------------------------
+# Production behind reverse proxy (envoy gateway → nginx → gunicorn)
+# Fixes V-271 #6: 403 on POST /login/ because Django CSRF rejects
+# the HTTPS Origin header when DEBUG=False and TRUSTED_ORIGINS is empty.
+# ---------------------------------------------------------------------------
+CSRF_TRUSTED_ORIGINS = [
+    "https://crm.vertexhub.ai",
+]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG

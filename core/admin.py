@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Account, Activity, Contact, Lead, Opportunity, User
+# Account is canonical in the `accounts` app — not registered here.
+from .models import Activity, Contact, Lead, Opportunity, User
 
 
 class SoftDeleteAdmin(admin.ModelAdmin):
@@ -20,14 +21,6 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (("Role", {"fields": ("role",)}),)
     list_display = ["username", "email", "first_name", "last_name", "role", "is_staff"]
     list_filter = ["role", "is_staff", "is_superuser"]
-
-
-@admin.register(Account)
-class AccountAdmin(SoftDeleteAdmin):
-    list_display = ["name", "industry", "size", "owner", "created_at", "deleted_at"]
-    search_fields = ["name", "website"]
-    list_filter = ["size", "deleted_at"]
-    readonly_fields = ["created_at", "updated_at", "deleted_at", "deleted_by"]
 
 
 @admin.register(Contact)

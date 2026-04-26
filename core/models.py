@@ -93,43 +93,10 @@ class User(AbstractUser):
 # Account
 # ---------------------------------------------------------------------------
 
-class Account(SoftDeleteMixin, TimestampMixin):
-    SIZE_1_10 = "1-10"
-    SIZE_11_50 = "11-50"
-    SIZE_51_200 = "51-200"
-    SIZE_201_1000 = "201-1000"
-    SIZE_1000_PLUS = "1000+"
-    SIZE_UNKNOWN = "unknown"
-    SIZE_CHOICES = [
-        (SIZE_1_10, "1–10"),
-        (SIZE_11_50, "11–50"),
-        (SIZE_51_200, "51–200"),
-        (SIZE_201_1000, "201–1000"),
-        (SIZE_1000_PLUS, "1000+"),
-        (SIZE_UNKNOWN, "Unknown"),
-    ]
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
-    website = models.URLField(blank=True)
-    industry = models.CharField(max_length=80, blank=True)
-    size = models.CharField(
-        max_length=10, choices=SIZE_CHOICES, default=SIZE_UNKNOWN
-    )
-    owner = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="owned_accounts"
-    )
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-    def _cascade_soft_delete(self, user):
-        Activity.objects.filter(account=self, deleted_at__isnull=True).update(
-            deleted_at=timezone.now(), deleted_by=user
-        )
+# Account is canonical in the `accounts` app. core.Account was a duplicate
+# that caused fields.E304 reverse-accessor clashes. Internal FKs that used
+# to reference the local class now use string FK "accounts.Account" so
+# Django app loading order is irrelevant.
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +111,7 @@ class Contact(SoftDeleteMixin, TimestampMixin):
     phone = models.CharField(max_length=40, blank=True)
     title = models.CharField(max_length=120, blank=True)
     account = models.ForeignKey(
-        Account,
+        "accounts.Account",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -235,7 +202,7 @@ class Lead(SoftDeleteMixin, TimestampMixin):
         related_name="source_leads",
     )
     converted_account = models.ForeignKey(
-        Account,
+        "accounts.Account",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -292,7 +259,7 @@ class Opportunity(SoftDeleteMixin, TimestampMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     account = models.ForeignKey(
-        Account,
+        "accounts.Account",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -378,7 +345,7 @@ class Activity(SoftDeleteMixin, TimestampMixin):
         Contact, null=True, blank=True, on_delete=models.CASCADE, related_name="activities"
     )
     account = models.ForeignKey(
-        Account, null=True, blank=True, on_delete=models.CASCADE, related_name="activities"
+        "accounts.Account", null=True, blank=True, on_delete=models.CASCADE, related_name="activities"
     )
     opportunity = models.ForeignKey(
         Opportunity, null=True, blank=True, on_delete=models.CASCADE, related_name="activities"
