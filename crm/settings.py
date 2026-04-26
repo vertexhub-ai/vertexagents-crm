@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "axes",
     # local
     "accounts",
+    "leads",
 ]
 
 MIDDLEWARE = [
